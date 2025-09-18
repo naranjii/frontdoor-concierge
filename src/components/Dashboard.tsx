@@ -24,10 +24,21 @@ export const Dashboard = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-secondary">
-        <AppSidebar activeView={activeView} setActiveView={setActiveView} />
+        <AppSidebar activeView={activeView} setActiveView={setActiveView} userRole="RECEPTIONIST" />
         
         <div className="flex-1 flex flex-col">
-          <DashboardHeader onCheckIn={() => setIsCheckInOpen(true)} />
+          <DashboardHeader 
+            onCheckIn={() => setIsCheckInOpen(true)} 
+            staff={{
+              id: "1",
+              email: "reception@clinic.com",
+              name: "Front Desk",
+              role: "RECEPTIONIST",
+              privileges: [],
+              created_at: "",
+              updated_at: ""
+            }}
+          />
           
           <main className="flex-1 p-6">
             {renderActiveView()}

@@ -11,18 +11,31 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 
-const menuItems = [
-  { id: "logbook", title: "Logbook", icon: FileText },
-  { id: "registrations", title: "Registrations", icon: Users },
-  { id: "analytics", title: "Analytics", icon: BarChart3, disabled: true },
+interface MenuItem {
+  id: string;
+  title: string;
+  icon: any;
+  roles: string[];
+  disabled?: boolean;
+}
+
+const allMenuItems: MenuItem[] = [
+  { id: "logbook", title: "Logbook", icon: FileText, roles: ["ADMIN", "RECEPTIONIST", "COORDINATOR", "THERAPIST"] },
+  { id: "registrations", title: "Registrations", icon: Users, roles: ["ADMIN", "RECEPTIONIST", "COORDINATOR"] },
+  { id: "scheduling", title: "Scheduling", icon: BarChart3, roles: ["ADMIN", "COORDINATOR", "THERAPIST"] },
+  { id: "finances", title: "Finances", icon: BarChart3, roles: ["ADMIN", "FINANCE"] },
+  { id: "staff", title: "Staff Management", icon: Users, roles: ["ADMIN"] },
 ];
 
 interface AppSidebarProps {
   activeView: string;
   setActiveView: (view: string) => void;
+  userRole: string;
 }
 
-export function AppSidebar({ activeView, setActiveView }: AppSidebarProps) {
+export function AppSidebar({ activeView, setActiveView, userRole }: AppSidebarProps) {
+  // Filter menu items based on user role
+  const menuItems = allMenuItems.filter(item => item.roles.includes(userRole))
   return (
     <Sidebar className="border-r bg-card shadow-soft">
       <SidebarHeader className="p-6 border-b">
