@@ -1,49 +1,47 @@
 import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Building2, Loader2 } from "lucide-react"
-import { useAuth } from "@/hooks/useAuth"
-import { useToast } from "@/hooks/use-toast"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Link, useNavigate } from "react-router-dom"
+import { Building2, LogIn } from "lucide-react"
+import { toast } from "sonner"
 
 export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
-  const { toast } = useToast()
+  const [role, setRole] = useState("")
   const navigate = useNavigate()
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    
+    if (!email || !password || !role) {
+      toast.error("Please fill in all fields")
+      return
+    }
 
-    try {
-      const result = await signIn(email, password)
-      
-      if (result.success) {
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in.",
-        })
-        navigate("/dashboard")
-      } else {
-        toast({
-          title: "Sign in failed",
-          description: result.error || "Invalid credentials",
-          variant: "destructive"
-        })
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive"
-      })
-    } finally {
-      setLoading(false)
+    toast.success(`Logged in as ${role}`)
+    
+    switch (role) {
+      case "ADMIN":
+        navigate("/admin")
+        break
+      case "FINANCE":
+        navigate("/finance")
+        break
+      case "COORDINATOR":
+        navigate("/coordinator")
+        break
+      case "THERAPIST":
+        navigate("/therapist")
+        break
+      case "RECEPTIONIST":
+        navigate("/receptionist")
+        break
+      default:
+        navigate("/receptionist")
     }
   }
 
@@ -78,7 +76,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={loading}
+                  
                 />
               </div>
               
@@ -91,23 +89,27 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={loading}
                 />
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign In"
-                )}
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Select value={role} onValueChange={setRole} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ADMIN">Administrator</SelectItem>
+                    <SelectItem value="RECEPTIONIST">Receptionist</SelectItem>
+                    <SelectItem value="COORDINATOR">Coordinator</SelectItem>
+                    <SelectItem value="THERAPIST">Therapist</SelectItem>
+                    <SelectItem value="FINANCE">Finance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button type="submit" className="w-full">
+                Sign In
               </Button>
             </form>
 
