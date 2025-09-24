@@ -24,7 +24,12 @@ export const Dashboard = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-secondary">
-        <AppSidebar activeView={activeView} setActiveView={setActiveView} userRole="RECEPTIONIST" />
+        <AppSidebar 
+          activeView={activeView} 
+          setActiveView={setActiveView} 
+          userPermissions={["reception"]}
+          currentUser={{ name: "Front Desk", role: "RECEPTIONIST" }}
+        />
         
         <div className="flex-1 flex flex-col">
           <DashboardHeader 

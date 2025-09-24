@@ -1,23 +1,38 @@
-import { useState } from "react"
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { useAuth } from "@/hooks/useAuth"
-import { Navigate } from "react-router-dom"
-import { AppSidebar } from "@/components/AppSidebar"
-import { DashboardHeader } from "@/components/DashboardHeader"
+import { useState } from "react";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { UserInfoBox } from "@/components/UserInfoBox";
+import { toast } from "sonner";
 
 interface DashboardLayoutProps {
-  children: React.ReactNode
-  currentView: string
-  onViewChange: (view: string) => void
+  children: React.ReactNode;
+  currentView: string;
+  onViewChange: (view: string) => void;
 }
 
-export function DashboardLayout({ children, currentView, onViewChange }: DashboardLayoutProps) {
-  const { staff } = useAuth()
-  const [isCheckInOpen, setIsCheckInOpen] = useState(false)
+// Mock user data - replace with real data from your API
+const mockUser = {
+  name: "Dr. Sarah Johnson",
+  role: "Senior Staff",
+  email: "sarah.johnson@otware.com",
+  permissions: ["admin", "finance", "coordination"] // This determines which sections show in sidebar
+};
 
-  if (!staff) {
-    return <Navigate to="/login" replace />
-  }
+export function DashboardLayout({ children, currentView, onViewChange }: DashboardLayoutProps) {
+  const handleLogout = () => {
+    toast.success("Logged out successfully");
+    // Handle logout logic here
+  };
+
+  const handleSettings = () => {
+    toast.info("Settings opened");
+    // Navigate to settings
+  };
+
+  const handleProfile = () => {
+    toast.info("Profile opened");
+    // Navigate to profile
+  };
 
   return (
     <SidebarProvider>
@@ -25,24 +40,39 @@ export function DashboardLayout({ children, currentView, onViewChange }: Dashboa
         <AppSidebar 
           activeView={currentView} 
           setActiveView={onViewChange}
-          userRole={staff.role}
+          userPermissions={mockUser.permissions}
+          currentUser={mockUser}
         />
         
         <div className="flex-1 flex flex-col">
-          <DashboardHeader 
-            onCheckIn={() => setIsCheckInOpen(true)}
-            staff={staff}
-          />
+          {/* Header */}
+          <header className="border-b bg-card/50 backdrop-blur-sm shadow-soft">
+            <div className="flex items-center justify-between px-6 py-4">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">OTWare Dashboard</h1>
+                <p className="text-sm text-muted-foreground">Healthcare Management System</p>
+              </div>
+              
+              <UserInfoBox 
+                user={mockUser}
+                onLogout={handleLogout}
+                onSettings={handleSettings}
+                onProfile={handleProfile}
+              />
+            </div>
+          </header>
           
-          <main className="flex-1 p-6">
+          {/* Main Content */}
+          <main className="flex-1 p-6 overflow-auto">
             {children}
           </main>
           
-          <footer className="border-t bg-card p-4 text-center text-sm text-muted-foreground">
-            © 2024 OTWare. All rights reserved.
+          {/* Footer */}
+          <footer className="border-t bg-card/30 backdrop-blur-sm p-4 text-center text-sm text-muted-foreground">
+            © 2024 OTWare Healthcare Solutions. All rights reserved.
           </footer>
         </div>
       </div>
     </SidebarProvider>
-  )
+  );
 }

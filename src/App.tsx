@@ -2,11 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { Toaster } from "@/components/ui/sonner"
 import Landing from "@/pages/Landing"
 import Login from "@/pages/Login"
-import AdminDashboard from "@/pages/AdminDashboard"
-import FinanceDashboard from "@/pages/FinanceDashboard"
-import CoordinatorDashboard from "@/pages/CoordinatorDashboard"
-import TherapistDashboard from "@/pages/TherapistDashboard"
-import ReceptionistDashboard from "@/pages/ReceptionistDashboard"
+import DashboardRouter from "@/pages/DashboardRouter"
 
 function App() {
   return (
@@ -15,11 +11,13 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/finance" element={<FinanceDashboard />} />
-          <Route path="/coordinator" element={<CoordinatorDashboard />} />
-          <Route path="/therapist" element={<TherapistDashboard />} />
-          <Route path="/receptionist" element={<ReceptionistDashboard />} />
+          <Route path="/dashboard" element={<DashboardRouter />} />
+          {/* Legacy routes for direct access */}
+          <Route path="/admin" element={<DashboardRouter />} />
+          <Route path="/finance" element={<DashboardRouter />} />
+          <Route path="/coordinator" element={<DashboardRouter />} />
+          <Route path="/therapist" element={<DashboardRouter />} />
+          <Route path="/receptionist" element={<DashboardRouter />} />
         </Routes>
         <Toaster />
       </div>
