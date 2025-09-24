@@ -1,4 +1,5 @@
-import { FileText, Users, UserPlus, BarChart3, Settings, DollarSign, Calendar, Activity, Shield, Building2, UserCheck } from "lucide-react";
+import { useState } from "react";
+import { FileText, Users, UserPlus, BarChart3, Settings, DollarSign, Calendar, Activity, Shield, Building2, UserCheck, ChevronDown } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -11,6 +12,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface MenuItem {
   id: string;
@@ -95,9 +97,26 @@ export function AppSidebar({ activeView, setActiveView, userPermissions, current
     .map(sectionKey => allMenuSections[sectionKey])
     .filter(Boolean);
 
+  // State to manage which sections are open
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
+    availableSections.reduce((acc, section) => {
+      // Check if any item in this section is currently active
+      const hasActiveItem = section.items.some(item => item.id === activeView);
+      acc[section.title] = hasActiveItem; // Keep section open if it has active item
+      return acc;
+    }, {} as Record<string, boolean>)
+  );
+
   const handleNavigation = (route: string, id: string) => {
     setActiveView(id);
     // In a real app, you'd use router.navigate(route) here
+  };
+
+  const toggleSection = (sectionTitle: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionTitle]: !prev[sectionTitle]
+    }));
   };
 
   return (
@@ -131,27 +150,43 @@ export function AppSidebar({ activeView, setActiveView, userPermissions, current
 
       <SidebarContent className="px-4">
         {availableSections.map((section) => (
-          <SidebarGroup key={section.title}>
-            <SidebarGroupLabel className="text-muted-foreground font-medium mb-2">
-              {section.title}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
-                {section.items.map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton
-                      onClick={() => handleNavigation(item.route, item.id)}
-                      isActive={activeView === item.id}
-                      className="transition-smooth hover:bg-accent/10 hover:text-accent data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-soft"
-                    >
-                      <item.icon className="mr-3 h-4 w-4" />
-                      <span className="text-sm">{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <Collapsible 
+            key={section.title}
+            open={openSections[section.title]}
+            onOpenChange={() => toggleSection(section.title)}
+          >
+            <SidebarGroup>
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="text-muted-foreground font-medium mb-2 cursor-pointer hover:text-foreground transition-smooth flex items-center justify-between w-full py-2 px-2 rounded-md hover:bg-accent/10">
+                  <span>{section.title}</span>
+                  <ChevronDown 
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      openSections[section.title] ? 'rotate-180' : ''
+                    }`} 
+                  />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent className="space-y-1">
+                <SidebarGroupContent>
+                  <SidebarMenu className="space-y-1">
+                    {section.items.map((item) => (
+                      <SidebarMenuItem key={item.id}>
+                        <SidebarMenuButton
+                          onClick={() => handleNavigation(item.route, item.id)}
+                          isActive={activeView === item.id}
+                          className="transition-smooth hover:bg-accent/10 hover:text-accent data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-soft"
+                        >
+                          <item.icon className="mr-3 h-4 w-4" />
+                          <span className="text-sm">{item.title}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
         ))}
       </SidebarContent>
     </Sidebar>

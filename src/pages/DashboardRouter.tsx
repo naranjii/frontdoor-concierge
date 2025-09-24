@@ -15,25 +15,25 @@ export default function DashboardRouter() {
       case "staff":
         return <AdminDashboard />;
       case "permissions":
-        return <div className="p-6"><h2 className="text-2xl font-bold">Permissions Management</h2><p className="text-muted-foreground">Coming soon...</p></div>;
+        return <AdminDashboard />; // Use admin dashboard for permissions management
       case "settings":
-        return <div className="p-6"><h2 className="text-2xl font-bold">System Settings</h2><p className="text-muted-foreground">Coming soon...</p></div>;
+        return <AdminDashboard />; // Use admin dashboard for system settings
       
       // Finance
       case "finance-overview":
         return <FinanceDashboard />;
       case "invoices":
-        return <div className="p-6"><h2 className="text-2xl font-bold">Invoices</h2><p className="text-muted-foreground">Coming soon...</p></div>;
+        return <FinanceDashboard />; // Use finance dashboard for invoices
       case "expenses":
-        return <div className="p-6"><h2 className="text-2xl font-bold">Expenses</h2><p className="text-muted-foreground">Coming soon...</p></div>;
+        return <FinanceDashboard />; // Use finance dashboard for expenses
       
       // Coordination
       case "scheduling":
         return <CoordinatorDashboard />;
       case "therapist-workload":
-        return <div className="p-6"><h2 className="text-2xl font-bold">Therapist Workload</h2><p className="text-muted-foreground">Coming soon...</p></div>;
+        return <CoordinatorDashboard />; // Use coordinator dashboard for therapist workload
       case "queue":
-        return <div className="p-6"><h2 className="text-2xl font-bold">Reception Queue</h2><p className="text-muted-foreground">Coming soon...</p></div>;
+        return <CoordinatorDashboard />; // Use coordinator dashboard for reception queue
       
       // Reception
       case "logbook":
