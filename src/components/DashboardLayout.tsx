@@ -3,25 +3,30 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { UserInfoBox } from "@/components/UserInfoBox";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   currentView: string;
   onViewChange: (view: string) => void;
+  user?: {
+    name: string;
+    role: string;
+    email: string;
+    permissions: string[];
+  };
 }
 
-// Mock user data - replace with real data from your API
-const mockUser = {
-  name: "Dr. Sarah Johnson",
-  role: "Senior Staff",
-  email: "sarah.johnson@otware.com",
-  permissions: ["admin", "finance", "coordination"] // This determines which sections show in sidebar
-};
+export function DashboardLayout({ children, currentView, onViewChange, user }: DashboardLayoutProps) {
+  const { signOut } = useAuth();
 
-export function DashboardLayout({ children, currentView, onViewChange }: DashboardLayoutProps) {
-  const handleLogout = () => {
-    toast.success("Logged out successfully");
-    // Handle logout logic here
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Logged out successfully");
+    } catch (error) {
+      toast.error("Error signing out");
+    }
   };
 
   const handleSettings = () => {
@@ -40,8 +45,8 @@ export function DashboardLayout({ children, currentView, onViewChange }: Dashboa
         <AppSidebar 
           activeView={currentView} 
           setActiveView={onViewChange}
-          userPermissions={mockUser.permissions}
-          currentUser={mockUser}
+          userPermissions={user?.permissions || []}
+          currentUser={user || { name: "User", role: "Staff", email: "", permissions: [] }}
         />
         
         <div className="flex-1 flex flex-col">
@@ -54,7 +59,7 @@ export function DashboardLayout({ children, currentView, onViewChange }: Dashboa
               </div>
               
               <UserInfoBox 
-                user={mockUser}
+                user={user || { name: "User", role: "Staff", email: "", permissions: [] }}
                 onLogout={handleLogout}
                 onSettings={handleSettings}
                 onProfile={handleProfile}

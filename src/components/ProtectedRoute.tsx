@@ -4,16 +4,14 @@ import { Loader2 } from "lucide-react"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
-  requiredRoles?: string[]
-  requiredPrivileges?: string[]
+  requiredPermissions?: string[]
 }
 
 export function ProtectedRoute({ 
   children, 
-  requiredRoles = [], 
-  requiredPrivileges = [] 
+  requiredPermissions = [] 
 }: ProtectedRouteProps) {
-  const { user, staff, loading, hasRole, hasPrivilege } = useAuth()
+  const { user, profile, loading, hasPermission } = useAuth()
 
   if (loading) {
     return (
@@ -26,20 +24,15 @@ export function ProtectedRoute({
     )
   }
 
-  if (!user || !staff) {
-    return <Navigate to="/login" replace />
+  if (!user || !profile) {
+    return <Navigate to="/auth" replace />
   }
 
-  // Check role requirements
-  if (requiredRoles.length > 0 && !hasRole(requiredRoles)) {
-    return <Navigate to="/unauthorized" replace />
-  }
-
-  // Check privilege requirements
-  if (requiredPrivileges.length > 0) {
-    const hasAllPrivileges = requiredPrivileges.every(privilege => hasPrivilege(privilege))
-    if (!hasAllPrivileges) {
-      return <Navigate to="/unauthorized" replace />
+  // Check permission requirements
+  if (requiredPermissions.length > 0) {
+    const hasAllPermissions = requiredPermissions.every(permission => hasPermission(permission))
+    if (!hasAllPermissions) {
+      return <Navigate to="/dashboard" replace />
     }
   }
 

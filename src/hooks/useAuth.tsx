@@ -1,118 +1,140 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
-import { supabase, Staff } from '@/lib/supabase'
-import { useToast } from '@/hooks/use-toast'
+import { User, Session } from '@supabase/supabase-js'
+import { supabase } from '@/integrations/supabase/client'
 
 interface AuthContextType {
   user: User | null
-  staff: Staff | null
+  session: Session | null
+  profile: any | null
+  permissions: string[]
+  isOwner: boolean
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
+  signIn: (email: string, password: string) => Promise<{ error: any }>
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>
   signOut: () => Promise<void>
-  hasRole: (roles: string[]) => boolean
-  hasPrivilege: (privilege: string) => boolean
+  hasPermission: (permission: string) => boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [staff, setStaff] = useState<Staff | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
+  const [profile, setProfile] = useState<any | null>(null)
+  const [permissions, setPermissions] = useState<string[]>([])
+  const [isOwner, setIsOwner] = useState(false)
   const [loading, setLoading] = useState(true)
-  const { toast } = useToast()
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchStaffProfile(session.user.id)
-      } else {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session)
+        setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          // Fetch user profile and permissions
+          setTimeout(async () => {
+            await fetchUserProfile(session.user.id)
+          }, 0)
+        } else {
+          setProfile(null)
+          setPermissions([])
+          setIsOwner(false)
+        }
+        
         setLoading(false)
       }
-    })
+    )
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
       setUser(session?.user ?? null)
+      
       if (session?.user) {
-        fetchStaffProfile(session.user.id)
-      } else {
-        setStaff(null)
-        setLoading(false)
+        fetchUserProfile(session.user.id)
       }
+      setLoading(false)
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  async function fetchStaffProfile(userId: string) {
+  const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('staff')
-        .select('*')
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*, organizations(*)')
         .eq('id', userId)
         .single()
 
-      if (error) throw error
-      setStaff(data)
+      if (profileError) throw profileError
+
+      setProfile(profileData)
+      setIsOwner(profileData.is_owner || false)
+
+      // Fetch permissions
+      const { data: permissionsData, error: permissionsError } = await supabase
+        .from('staff_permissions')
+        .select('permission')
+        .eq('user_id', userId)
+
+      if (permissionsError) throw permissionsError
+
+      setPermissions(permissionsData.map(p => p.permission))
     } catch (error) {
-      console.error('Error fetching staff profile:', error)
-      toast({
-        title: "Error",
-        description: "Failed to load profile",
-        variant: "destructive"
-      })
-    } finally {
-      setLoading(false)
+      console.error('Error fetching user profile:', error)
     }
   }
 
-  async function signIn(email: string, password: string) {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) throw error
-
-      return { success: true }
-    } catch (error: any) {
-      return { success: false, error: error.message }
-    }
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+    return { error }
   }
 
-  async function signOut() {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: "destructive"
-      })
-    }
+  const signUp = async (email: string, password: string, fullName: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: {
+          full_name: fullName
+        }
+      }
+    })
+    return { error }
   }
 
-  function hasRole(roles: string[]): boolean {
-    return staff ? roles.includes(staff.role) : false
+  const signOut = async () => {
+    await supabase.auth.signOut()
   }
 
-  function hasPrivilege(privilege: string): boolean {
-    return staff ? staff.privileges.includes(privilege) : false
+  const hasPermission = (permission: string) => {
+    return permissions.includes(permission) || isOwner
   }
 
-  const value = {
-    user,
-    staff,
-    loading,
-    signIn,
-    signOut,
-    hasRole,
-    hasPrivilege,
-  }
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{
+      user,
+      session,
+      profile,
+      permissions,
+      isOwner,
+      loading,
+      signIn,
+      signUp,
+      signOut,
+      hasPermission
+    }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {

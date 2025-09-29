@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useAuth } from "@/hooks/useAuth";
 import AdminDashboard from "@/pages/AdminDashboard";
 import FinanceDashboard from "@/pages/FinanceDashboard";
 import CoordinatorDashboard from "@/pages/CoordinatorDashboard";
@@ -7,7 +10,32 @@ import TherapistDashboard from "@/pages/TherapistDashboard";
 import ReceptionistDashboard from "@/pages/ReceptionistDashboard";
 
 export default function DashboardRouter() {
+  const { user, profile, permissions, isOwner, loading } = useAuth()
   const [activeView, setActiveView] = useState("staff"); // Default view
+
+  // Show loading while auth is resolving
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-secondary flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Redirect to auth if not authenticated
+  if (!user || !profile) {
+    return <Navigate to="/auth" replace />
+  }
+
+  const currentUser = {
+    name: profile.name,
+    role: isOwner ? "Owner" : "Staff Member",
+    email: profile.email,
+    permissions: permissions
+  }
 
   const renderActiveView = () => {
     switch (activeView) {
@@ -57,11 +85,14 @@ export default function DashboardRouter() {
   };
 
   return (
-    <DashboardLayout 
-      currentView={activeView} 
-      onViewChange={setActiveView}
-    >
-      {renderActiveView()}
-    </DashboardLayout>
+    <ProtectedRoute>
+      <DashboardLayout 
+        currentView={activeView} 
+        onViewChange={setActiveView}
+        user={currentUser}
+      >
+        {renderActiveView()}
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 }

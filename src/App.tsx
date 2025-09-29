@@ -1,28 +1,28 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { Toaster } from "@/components/ui/sonner"
 import Landing from "@/pages/Landing"
-import Login from "@/pages/Login"
+import AuthPage from "@/pages/AuthPage"
 import DashboardRouter from "@/pages/DashboardRouter"
+import { Toaster } from "@/components/ui/sonner"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { AuthProvider } from "@/hooks/useAuth"
+
+const queryClient = new QueryClient()
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gradient-secondary">
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<DashboardRouter />} />
-          {/* Legacy routes for direct access */}
-          <Route path="/admin" element={<DashboardRouter />} />
-          <Route path="/finance" element={<DashboardRouter />} />
-          <Route path="/coordinator" element={<DashboardRouter />} />
-          <Route path="/therapist" element={<DashboardRouter />} />
-          <Route path="/receptionist" element={<DashboardRouter />} />
-        </Routes>
-        <Toaster />
-      </div>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/dashboard/*" element={<DashboardRouter />} />
+          </Routes>
+          <Toaster />
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
   )
 }
 
-export default App;
+export default App
