@@ -248,11 +248,13 @@ export type Database = {
           date_of_birth: string | null
           email: string | null
           emergency_contact: string | null
+          healthcare_id: string | null
           id: string
           medical_notes: string | null
           name: string
           organization_id: string | null
           phone: string | null
+          support_level: string | null
           updated_at: string
         }
         Insert: {
@@ -261,11 +263,13 @@ export type Database = {
           date_of_birth?: string | null
           email?: string | null
           emergency_contact?: string | null
+          healthcare_id?: string | null
           id?: string
           medical_notes?: string | null
           name: string
           organization_id?: string | null
           phone?: string | null
+          support_level?: string | null
           updated_at?: string
         }
         Update: {
@@ -274,11 +278,13 @@ export type Database = {
           date_of_birth?: string | null
           email?: string | null
           emergency_contact?: string | null
+          healthcare_id?: string | null
           id?: string
           medical_notes?: string | null
           name?: string
           organization_id?: string | null
           phone?: string | null
+          support_level?: string | null
           updated_at?: string
         }
         Relationships: [

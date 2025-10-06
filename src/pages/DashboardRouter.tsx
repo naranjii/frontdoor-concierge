@@ -11,7 +11,18 @@ import ReceptionistDashboard from "@/pages/ReceptionistDashboard";
 
 export default function DashboardRouter() {
   const { user, profile, permissions, isOwner, loading } = useAuth()
-  const [activeView, setActiveView] = useState("staff"); // Default view
+  
+  // Set initial view based on permissions
+  const getInitialView = () => {
+    if (permissions.includes("admin")) return "staff"
+    if (permissions.includes("finance")) return "finance-overview"
+    if (permissions.includes("coordination")) return "scheduling"
+    if (permissions.includes("therapy")) return "appointments"
+    if (permissions.includes("reception")) return "logbook"
+    return "staff"
+  }
+  
+  const [activeView, setActiveView] = useState(getInitialView())
 
   // Show loading while auth is resolving
   if (loading) {
@@ -38,49 +49,44 @@ export default function DashboardRouter() {
   }
 
   const renderActiveView = () => {
+    // If user has admin permission, always show admin dashboard
+    if (permissions.includes("admin")) {
+      return <AdminDashboard />;
+    }
+
+    // Otherwise show based on active view
     switch (activeView) {
-      // Administration
-      case "staff":
-        return <AdminDashboard />;
-      case "permissions":
-        return <AdminDashboard />; // Use admin dashboard for permissions management
-      case "settings":
-        return <AdminDashboard />; // Use admin dashboard for system settings
-      
       // Finance
       case "finance-overview":
-        return <FinanceDashboard />;
       case "invoices":
-        return <FinanceDashboard />; // Use finance dashboard for invoices
       case "expenses":
-        return <FinanceDashboard />; // Use finance dashboard for expenses
+        return <FinanceDashboard />;
       
       // Coordination
       case "scheduling":
-        return <CoordinatorDashboard />;
       case "therapist-workload":
-        return <CoordinatorDashboard />; // Use coordinator dashboard for therapist workload
       case "queue":
-        return <CoordinatorDashboard />; // Use coordinator dashboard for reception queue
+        return <CoordinatorDashboard />;
       
       // Reception
       case "logbook":
-        return <ReceptionistDashboard />;
       case "registrations":
-        return <div className="p-6"><h2 className="text-2xl font-bold">Patient Registrations</h2><p className="text-muted-foreground">Coming soon...</p></div>;
       case "checkin":
-        return <div className="p-6"><h2 className="text-2xl font-bold">Patient Check-in</h2><p className="text-muted-foreground">Coming soon...</p></div>;
+        return <ReceptionistDashboard />;
       
       // Therapy
       case "appointments":
-        return <TherapistDashboard />;
       case "patients":
-        return <div className="p-6"><h2 className="text-2xl font-bold">My Patients</h2><p className="text-muted-foreground">Coming soon...</p></div>;
       case "notes":
-        return <div className="p-6"><h2 className="text-2xl font-bold">Session Notes</h2><p className="text-muted-foreground">Coming soon...</p></div>;
+        return <TherapistDashboard />;
       
       default:
-        return <AdminDashboard />;
+        // Show first available dashboard based on permissions
+        if (permissions.includes("finance")) return <FinanceDashboard />;
+        if (permissions.includes("coordination")) return <CoordinatorDashboard />;
+        if (permissions.includes("therapy")) return <TherapistDashboard />;
+        if (permissions.includes("reception")) return <ReceptionistDashboard />;
+        return <div className="p-6"><h2 className="text-2xl font-bold">Dashboard</h2><p className="text-muted-foreground">No permissions assigned</p></div>;
     }
   };
 

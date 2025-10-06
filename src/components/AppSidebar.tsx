@@ -107,9 +107,8 @@ export function AppSidebar({ activeView, setActiveView, userPermissions, current
     }, {} as Record<string, boolean>)
   );
 
-  const handleNavigation = (route: string, id: string) => {
+  const handleNavigation = (id: string) => {
     setActiveView(id);
-    // In a real app, you'd use router.navigate(route) here
   };
 
   const toggleSection = (sectionTitle: string) => {
@@ -173,7 +172,7 @@ export function AppSidebar({ activeView, setActiveView, userPermissions, current
                     {section.items.map((item) => (
                       <SidebarMenuItem key={item.id}>
                         <SidebarMenuButton
-                          onClick={() => handleNavigation(item.route, item.id)}
+                          onClick={() => handleNavigation(item.id)}
                           isActive={activeView === item.id}
                           className="transition-smooth hover:bg-accent/10 hover:text-accent data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-soft"
                         >
