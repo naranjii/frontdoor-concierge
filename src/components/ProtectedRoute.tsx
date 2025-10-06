@@ -24,8 +24,20 @@ export function ProtectedRoute({
     )
   }
 
-  if (!user || !profile) {
+  if (!user) {
     return <Navigate to="/auth" replace />
+  }
+  
+  if (!profile) {
+    // Still loading profile, show loading state
+    return (
+      <div className="min-h-screen bg-gradient-secondary flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    )
   }
 
   // Check permission requirements

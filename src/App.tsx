@@ -16,7 +16,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/dashboard/*" element={<DashboardRouter />} />
+            <Route path="/dashboard" element={<DashboardRouter />} />
           </Routes>
           <Toaster />
         </Router>

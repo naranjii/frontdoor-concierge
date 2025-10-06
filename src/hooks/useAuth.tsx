@@ -26,39 +26,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let mounted = true
+
+    // Check for existing session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return
+      
+      setSession(session)
+      setUser(session?.user ?? null)
+      
+      if (session?.user) {
+        fetchUserProfile(session.user.id).finally(() => {
+          if (mounted) setLoading(false)
+        })
+      } else {
+        setLoading(false)
+      }
+    })
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        if (!mounted) return
+        
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          // Fetch user profile and permissions
-          setTimeout(async () => {
-            await fetchUserProfile(session.user.id)
+          // Use setTimeout to avoid blocking the auth state change
+          setTimeout(() => {
+            if (mounted) {
+              fetchUserProfile(session.user.id)
+            }
           }, 0)
         } else {
           setProfile(null)
           setPermissions([])
           setIsOwner(false)
         }
-        
-        setLoading(false)
       }
     )
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        fetchUserProfile(session.user.id)
-      }
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const fetchUserProfile = async (userId: string) => {

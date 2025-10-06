@@ -18,11 +18,7 @@ export default function AuthPage() {
   const { signIn, signUp, user } = useAuth()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (user) {
-      navigate("/dashboard")
-    }
-  }, [user, navigate])
+  // Redirect is handled by the router, no need for useEffect here
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
