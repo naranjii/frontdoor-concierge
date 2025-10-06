@@ -71,7 +71,7 @@ export default function Landing() {
             </div>
           </div>
           <Button asChild>
-            <Link to="/login">Staff Login</Link>
+            <Link to="/auth">Staff Login</Link>
           </Button>
         </div>
       </header>
@@ -177,7 +177,7 @@ export default function Landing() {
             daily operations and long-term growth.
           </p>
           <Button variant="secondary" size="lg" asChild>
-            <Link to="/login">Start Your Journey</Link>
+            <Link to="/auth">Start Your Journey</Link>
           </Button>
         </div>
       </section>
