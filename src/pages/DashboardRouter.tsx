@@ -49,13 +49,14 @@ export default function DashboardRouter() {
   }
 
   const renderActiveView = () => {
-    // If user has admin permission, always show admin dashboard
-    if (permissions.includes("admin")) {
-      return <AdminDashboard />;
-    }
-
-    // Otherwise show based on active view
+    // Route based on active view, not locked to admin dashboard
     switch (activeView) {
+      // Admin
+      case "staff":
+      case "permissions":
+      case "settings":
+        return <AdminDashboard />;
+      
       // Finance
       case "finance-overview":
       case "invoices":
@@ -82,6 +83,7 @@ export default function DashboardRouter() {
       
       default:
         // Show first available dashboard based on permissions
+        if (permissions.includes("admin")) return <AdminDashboard />;
         if (permissions.includes("finance")) return <FinanceDashboard />;
         if (permissions.includes("coordination")) return <CoordinatorDashboard />;
         if (permissions.includes("therapy")) return <TherapistDashboard />;
